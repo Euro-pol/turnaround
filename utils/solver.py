@@ -16,7 +16,7 @@ class Solver:
         # this builds a custom page with the sitekey so we do not have to load the actual page, taking less bandwidth
         with open("utils/page.html") as f:
             self.page_data = f.read()
-        stub = f"<div class=\"cf-turnstile\" data-sitekey=\"{self.sitekey}\"></div>"
+        stub = f"<div class=\"cf-turnstile\" data-sitekey=\"{self.sitekey}\" data-action=\"{self.action}\" data-cdata=\"{self.cdata}\"></div>"
         self.page_data = self.page_data.replace("<!-- cf turnstile -->", stub)
 
     def get_mouse_path(self, x1, y1, x2, y2):
@@ -70,9 +70,7 @@ class Solver:
             time.sleep(random.randint(2, 5) / random.randint(400, 600))
         return "failed"
             
-
     def solve_visible(self):
-     
         iframe = self.page.query_selector("iframe")
         while not iframe:
             iframe = self.page.query_selector("iframe")
@@ -102,7 +100,6 @@ class Solver:
 
         self.current_x = x
         self.current_y = y
-        
 
         time.sleep(random.randint(1, 5) / random.randint(400, 600))
         self.page.mouse.click(x, y)
@@ -124,12 +121,12 @@ class Solver:
             time.sleep(random.randint(2, 5) / random.randint(400, 600))
         return "failed"
 
-
-    
-    def solve(self, url, sitekey, invisible=False):
+    def solve(self, url, sitekey, invisible=False, cdata="", action=""):
         self.url = url + "/" if not url.endswith("/") else url
         self.sitekey = sitekey
         self.invisible = invisible
+        self.cdata = cdata  # Add cData
+        self.action = action  # Add Action
         self.context = self.browser.new_context()
         self.page = self.context.new_page()
 
@@ -150,8 +147,8 @@ class Solver:
         
         self.context.close()
         return output
-    def start_browser(self, playwright):
 
+    def start_browser(self, playwright):
         if self.proxy:
             self.browser = playwright.firefox.launch(headless=self.headless, proxy={
                 "server": "http://" + self.proxy.split("@")[1],
@@ -160,4 +157,3 @@ class Solver:
             })
         else:
             self.browser = playwright.firefox.launch(headless=self.headless)
-
